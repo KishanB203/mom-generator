@@ -1,4 +1,4 @@
-# Publishes the download page (website/) on GitHub Pages: https://<owner>.github.io/<repo>/
+# Publishes the download page (website/) on GitHub Pages: https://kishanb203.github.io/mom-generator/
 name: Website
 
 on:
