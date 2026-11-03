@@ -1,0 +1,51 @@
+# Builds MoMGenerator-Setup.exe and publishes it as a GitHub release.
+# Trigger: push a tag that matches mom_app/__init__.py's __version__, e.g.  git tag v1.0.0 && git push origin v1.0.0
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches the app version
+        shell: pwsh
+        run: |
+          $version = python -c "import mom_app; print(mom_app.__version__)"
+          if ("v$version" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} != app version v$version (mom_app/__init__.py)" }
+
+      - name: Install packages and tools
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+          choco install innosetup -y --no-progress
+
+      - name: Build the installer
+        shell: pwsh
+        run: ./installer/build.ps1 -Python python
+
+      - name: Self-test the packaged app
+        shell: pwsh
+        run: |
+          $p = Start-Process build\dist\MoMGenerator\MoMGenerator.exe -ArgumentList "--selftest" -Wait -PassThru
+          Get-Content "$env:APPDATA\MoMGenerator\app.log" | Select-String "selftest"
+          # no audio devices on the build server, so only the other checks must pass
+          $failed = Get-Content "$env:APPDATA\MoMGenerator\app.log" | Select-String "selftest (?!audio_devices)\w+: FAILED"
+          if ($failed) { throw "Self-test failed" }
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MoMGenerator-Setup.exe
+          generate_release_notes: true

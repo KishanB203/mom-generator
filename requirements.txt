@@ -1,0 +1,10 @@
+anthropic>=2.3.0
+faster-whisper>=1.2.0
+PyAudioWPatch>=0.2.12
+numpy
+scipy
+pystray>=0.19.5
+pillow
+pynput>=1.8
+pywin32
+comtypes>=1.4
