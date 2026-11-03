@@ -35,7 +35,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
     Download for Windows
   </a>
-  <div class="meta"><span id="meta">Windows 10 / 11</span> · <a id="releases" href="#">All versions</a></div>
+  <div class="meta" id="meta">Windows 10 / 11</div>
   <div class="meta"><a href="https://github.com/KishanB203/mom-generator#privacy-policy">Privacy</a> ·
     <a href="https://github.com/KishanB203/mom-generator#code-signing-policy">Code signing policy</a></div>
 </main>
@@ -45,7 +45,6 @@
   const repo = gh && location.pathname.split("/")[1] ? `${gh[1]}/${location.pathname.split("/")[1]}` : document.body.dataset.repo;
   const releases = `https://github.com/${repo}/releases`;
   document.getElementById("download").href = `${releases}/latest/download/${FILE}`;
-  document.getElementById("releases").href = releases;
   fetch(`https://api.github.com/repos/${repo}/releases/latest`)
     .then(r => r.ok ? r.json() : Promise.reject(r.status))
     .then(rel => {
