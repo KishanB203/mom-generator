@@ -18,13 +18,6 @@ Leave       ─►  🟠 1. the last minute of speech to text, each sentence in 
                 Downloads\MoM_Notes\02_11_2026_<meeting>.txt              (the MoM, opened for your review)
 ```
 
-The transcript looks like this:
-```
-User_1: did you check vendor data?
-User_2: હા, મેં vendor data જોઈ લીધો છે
-User_3: मैं construction master का mapping कल तक finish कर दूँगा
-```
-
 ---
 
 ## Install (users)
