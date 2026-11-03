@@ -1,4 +1,5 @@
 # Publishes the download page (website/) on GitHub Pages: https://kishanb203.github.io/mom-generator/
+# If the repository is renamed, set Settings > Pages > Source to "GitHub Actions" again.
 name: Website
 
 on:
