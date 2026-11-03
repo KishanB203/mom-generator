@@ -16,7 +16,6 @@ meeting ends only the last minute or so is left to do.
 
 import ctypes
 import logging
-import os
 import threading
 import time
 from pathlib import Path
@@ -206,9 +205,7 @@ class _GrowingWav:
         self.read_bytes = 0
 
     def read_new(self, final: bool = False) -> np.ndarray:
-        from math import gcd
-
-        from scipy.signal import resample_poly
+        from .resample import to_16k
 
         if not self.rate:
             import wave
@@ -229,10 +226,7 @@ class _GrowingWav:
         audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
         if self.channels > 1:
             audio = audio.reshape(-1, self.channels).mean(axis=1)
-        if self.rate != SR:
-            g = gcd(self.rate, SR)
-            audio = resample_poly(audio, SR // g, self.rate // g).astype(np.float32)
-        return audio
+        return to_16k(audio, self.rate)
 
 
 class _Track:

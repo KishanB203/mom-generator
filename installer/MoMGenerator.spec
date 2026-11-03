@@ -18,7 +18,8 @@ a = Analysis(
         + collect_submodules("pystray")
         + ["pynput.keyboard._win32", "pynput.mouse._win32", "win32timezone"]
     ),
-    excludes=["torch", "tensorflow", "matplotlib", "pandas", "IPython", "pytest"],
+    # av and scipy: not needed (see mom_app/__init__.py and resample.py); _avif: an image format the app never uses
+    excludes=["av", "scipy", "PIL._avif", "PIL.AvifImagePlugin", "torch", "tensorflow", "matplotlib", "pandas", "IPython", "pytest"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

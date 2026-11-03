@@ -4,162 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MoM Generator</title>
-<meta name="description" content="Minutes of Meeting for Teams and in-person meetings - English, Hindi and Gujarati. Free Windows app.">
+<meta name="description" content="Records your meetings and writes the minutes for you. Free Windows app.">
 <link rel="icon" href="favicon.png">
 <style>
-  :root {
-    --bg: #ffffff; --bg-soft: #f4f6fb; --text: #111827; --muted: #5b6475; --line: #e3e7ef;
-    --brand: #2563eb; --brand-dark: #1d4ed8; --red: #dc2626; --orange: #ea8c00; --card: #ffffff;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1420; --bg-soft: #161d2c; --text: #e8ecf4; --muted: #9aa4b8; --line: #263045; --card: #131a28; }
-  }
+  :root { --bg: #ffffff; --text: #111827; --muted: #5b6475; --brand: #2563eb; --brand-dark: #1d4ed8; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1420; --text: #e8ecf4; --muted: #9aa4b8; } }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; }
-  a { color: var(--brand); }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
-  header.top { display: flex; align-items: center; gap: 10px; padding: 18px 0; font-weight: 600; }
-  header.top img { width: 30px; height: 30px; }
-  .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; padding: 40px 0 56px; }
-  h1 { font-size: clamp(32px, 5vw, 46px); line-height: 1.12; margin: 0 0 16px; letter-spacing: -0.02em; }
-  .lead { font-size: 18px; color: var(--muted); margin: 0 0 28px; }
-  .download { display: inline-flex; align-items: center; gap: 12px; background: var(--brand); color: #fff; text-decoration: none;
-              padding: 15px 26px; border-radius: 10px; font-size: 18px; font-weight: 600; box-shadow: 0 6px 18px rgba(37, 99, 235, .3); }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+         display: grid; place-items: center; text-align: center; padding: 24px 16px; }
+  img { width: 72px; height: 72px; }
+  h1 { font-size: clamp(28px, 6vw, 40px); margin: 14px 0 6px; letter-spacing: -0.02em; }
+  p { color: var(--muted); margin: 0 0 28px; font-size: 18px; }
+  .download { display: inline-flex; align-items: center; gap: 10px; background: var(--brand); color: #fff; text-decoration: none;
+              padding: 14px 28px; border-radius: 10px; font-size: 18px; font-weight: 600; box-shadow: 0 6px 18px rgba(37, 99, 235, .3); }
   .download:hover { background: var(--brand-dark); }
   .download svg { width: 22px; height: 22px; }
-  .meta { color: var(--muted); font-size: 14px; margin-top: 12px; }
-  .demo { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; font: 14px/1.7 Consolas, "Cascadia Mono", monospace;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, .06); overflow-wrap: anywhere; }
-  .demo .h { font: 600 12px "Segoe UI", sans-serif; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
-  .demo b { color: var(--brand); font-weight: 600; }
-  section { padding: 56px 0; }
-  section.soft { background: var(--bg-soft); }
-  h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
-  .sub { color: var(--muted); margin: 0 0 30px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
-  .card h3 { margin: 6px 0 6px; font-size: 17px; }
-  .card p { margin: 0; color: var(--muted); font-size: 15px; }
-  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 6px; vertical-align: -1px; }
-  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
-  ol.steps li { counter-increment: s; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 16px 62px; position: relative; }
-  ol.steps li::before { content: counter(s); position: absolute; left: 18px; top: 15px; width: 30px; height: 30px; border-radius: 50%;
-                        background: var(--brand); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 15px; }
-  ol.steps strong { display: block; }
-  ol.steps span { color: var(--muted); font-size: 15px; }
-  .note { border-left: 4px solid var(--orange); background: var(--card); padding: 12px 16px; border-radius: 6px; color: var(--muted); font-size: 15px; margin-top: 18px; }
-  details { border-bottom: 1px solid var(--line); padding: 14px 0; }
-  summary { cursor: pointer; font-weight: 600; }
-  details p { color: var(--muted); margin: 8px 0 0; }
-  footer { color: var(--muted); font-size: 14px; padding: 30px 0 40px; text-align: center; }
-  @media (max-width: 760px) {
-    .hero { grid-template-columns: 1fr; padding-top: 16px; }
-    .grid { grid-template-columns: 1fr; }
-    .download { width: 100%; justify-content: center; }
-  }
+  .meta { color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .meta a { color: inherit; }
 </style>
 </head>
-<!-- data-repo: the GitHub repository ("owner/name") whose Releases hold MoMGenerator-Setup.exe.
-     On GitHub Pages (owner.github.io/name) it is detected automatically. -->
+<!-- data-repo: the GitHub repository whose latest release holds MoMGenerator-Setup.exe (auto-detected on github.io) -->
 <body data-repo="KishanB203/mom-generator">
-<div class="wrap">
-  <header class="top"><img src="icon.png" alt="">MoM Generator</header>
-
-  <div class="hero">
-    <div>
-      <h1>Your meeting minutes, written for you.</h1>
-      <p class="lead">Records your Teams meetings automatically, or an in-person meeting with your laptop microphone, and turns them
-        into a clean English MoM. Understands English, Hindi and Gujarati, even mixed in one sentence.</p>
-      <a class="download" id="download" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-        Download for Windows
-      </a>
-      <div class="meta" id="meta">Free · Windows 10 / 11 · about 90 MB</div>
-    </div>
-    <div class="demo" aria-label="Example transcript">
-      <div class="h">Transcript</div>
-      <div><b>Aarav:</b> did you check vendor data?</div>
-      <div><b>Riya:</b> હા, મેં vendor data જોઈ લીધો છે</div>
-      <div><b>Neel:</b> मैं mapping कल तक finish कर दूँगा</div>
-      <div class="h" style="margin-top:14px">MoM</div>
-      <div>• Vendor data checked (Riya)</div>
-      <div>• Mapping to be finished tomorrow (Neel)</div>
-    </div>
-  </div>
-</div>
-
-<section class="soft">
-  <div class="wrap">
-    <h2>What it does</h2>
-    <p class="sub">A small icon next to the clock. No meetings bot, nothing to remember.</p>
-    <div class="grid">
-      <div class="card"><span class="dot" style="background:var(--red)"></span><h3>Teams meetings, automatically</h3>
-        <p>Join a meeting and recording starts. Leave it and the MoM is created. Speaker names come from the Teams window.</p></div>
-      <div class="card"><span class="dot" style="background:var(--brand)"></span><h3>In-person meetings</h3>
-        <p>Click the icon to record the room with your laptop microphone. Click again to stop.</p></div>
-      <div class="card"><span class="dot" style="background:var(--orange)"></span><h3>Two files, every time</h3>
-        <p>A "who said what" transcript in the language it was spoken, plus the English MoM, saved in Downloads\MoM_Notes.</p></div>
-      <div class="card"><span class="dot" style="background:#15803d"></span><h3>English, Hindi, Gujarati</h3>
-        <p>Each sentence is written in its own script, then translated, so nothing said in Hindi or Gujarati is lost.</p></div>
-      <div class="card"><span class="dot" style="background:#7c3aed"></span><h3>Private by design</h3>
-        <p>Audio is turned into text on your PC and never uploaded. Only the text goes to Claude, with your own account.</p></div>
-      <div class="card"><span class="dot" style="background:#0891b2"></span><h3>You review, then send</h3>
-        <p>The MoM opens in Notepad. Unclear points are marked (?) so you can fix them before sharing.</p></div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Install in 3 minutes</h2>
-    <p class="sub">No admin rights needed.</p>
-    <ol class="steps">
-      <li><strong>Download and double-click MoMGenerator-Setup.exe</strong>
-        <span>If Windows shows "Windows protected your PC", click <em>More info</em> → <em>Run anyway</em>.</span></li>
-      <li><strong>Click Install</strong><span>The app starts by itself when the install finishes.</span></li>
-      <li><strong>Follow the setup window</strong>
-        <span>It installs Claude Code if needed, opens your browser to sign in with your Claude account, and downloads the speech model (1.6 GB, once).</span></li>
-      <li><strong>Done</strong><span>A short guide shows how to start and stop. Your notes appear in Downloads\MoM_Notes.</span></li>
-    </ol>
-    <div class="note"><strong>You need a Claude account</strong> with Claude Code access (Pro, Max, Team or Enterprise plan) to write the MoM.
-      An Anthropic API key works too.</div>
-  </div>
-</section>
-
-<section class="soft">
-  <div class="wrap">
-    <h2>Questions</h2>
-    <details><summary>Is it free?</summary><p>The app is free. Writing the MoM uses your own Claude plan or API key.</p></details>
-    <details><summary>Does it work on Mac?</summary><p>No, Windows 10 and 11 only.</p></details>
-    <details><summary>Do I have to start it before every meeting?</summary>
-      <p>No. Tick "Start MoM Generator when Windows starts" during setup and Teams meetings are caught automatically.</p></details>
-    <details><summary>How long does the MoM take?</summary>
-      <p>Speech is converted to text during the meeting, so the MoM is usually ready 1–3 minutes after you leave.</p></details>
-    <details><summary>How do I update or uninstall?</summary>
-      <p>Download and run the latest setup over the old one; your notes and settings stay. Uninstall from Windows Settings → Apps.</p></details>
-    <details><summary>Should I tell people I'm recording?</summary>
-      <p>Yes. Always tell participants the meeting is being recorded, and follow your company's recording policy.</p></details>
-  </div>
-</section>
-
-<footer><span id="version"></span> · <a id="releases" href="#">All versions</a></footer>
-
+<main>
+  <img src="icon.png" alt="">
+  <h1>MoM Generator</h1>
+  <p>Records your meetings and writes the minutes for you.</p>
+  <a class="download" id="download" href="#">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+    Download for Windows
+  </a>
+  <div class="meta"><span id="meta">Windows 10 / 11</span> · <a id="releases" href="#">All versions</a></div>
+</main>
 <script>
-  // Download link: the latest GitHub release's MoMGenerator-Setup.exe.
   const FILE = "MoMGenerator-Setup.exe";
   const gh = location.hostname.match(/^([^.]+)\.github\.io$/i);
   const repo = gh && location.pathname.split("/")[1] ? `${gh[1]}/${location.pathname.split("/")[1]}` : document.body.dataset.repo;
   const releases = `https://github.com/${repo}/releases`;
   document.getElementById("download").href = `${releases}/latest/download/${FILE}`;
   document.getElementById("releases").href = releases;
-
   fetch(`https://api.github.com/repos/${repo}/releases/latest`)
     .then(r => r.ok ? r.json() : Promise.reject(r.status))
     .then(rel => {
       const asset = (rel.assets || []).find(a => a.name === FILE);
-      const mb = asset ? ` · ${Math.round(asset.size / 1048576)} MB` : "";
-      document.getElementById("meta").textContent = `Free · Windows 10 / 11 · version ${rel.tag_name.replace(/^v/, "")}${mb}`;
-      document.getElementById("version").textContent = `Version ${rel.tag_name.replace(/^v/, "")}`;
+      const size = asset ? ` · ${Math.round(asset.size / 1048576)} MB` : "";
+      document.getElementById("meta").textContent = `Windows 10 / 11 · version ${rel.tag_name.replace(/^v/, "")}${size}`;
     })
     .catch(() => {});
 </script>

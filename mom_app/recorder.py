@@ -227,9 +227,7 @@ class Recorder:
 
 def load_mono_16k(path: Path) -> np.ndarray:
     """Read a 16-bit WAV and return float32 mono at 16 kHz (what Whisper expects)."""
-    from math import gcd
-
-    from scipy.signal import resample_poly
+    from .resample import to_16k
 
     with wave.open(str(path), "rb") as w:
         rate, channels = w.getframerate(), w.getnchannels()
@@ -237,7 +235,4 @@ def load_mono_16k(path: Path) -> np.ndarray:
     audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
     if channels > 1:
         audio = audio.reshape(-1, channels).mean(axis=1)
-    if rate != 16000:
-        g = gcd(rate, 16000)
-        audio = resample_poly(audio, 16000 // g, rate // g).astype(np.float32)
-    return audio
+    return to_16k(audio, rate)

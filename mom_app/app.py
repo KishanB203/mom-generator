@@ -568,6 +568,23 @@ def _selftest() -> int:
 
         return list_devices()
 
+    def audio_resampling():
+        import tempfile
+        import wave
+
+        from .transcriber import _GrowingWav
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test.wav"
+            with wave.open(str(path), "wb") as w:  # 1 s of 48 kHz stereo, like a headset
+                w.setnchannels(2)
+                w.setsampwidth(2)
+                w.setframerate(48000)
+                w.writeframes((np.sin(np.arange(96000) / 10) * 8000).astype(np.int16).tobytes())
+            audio = _GrowingWav(path).read_new()
+        assert len(audio) == 16000 and audio.dtype == np.float32, (len(audio), audio.dtype)
+        return len(audio)
+
     def voice_detection():
         from .transcriber import _speech_spans
 
@@ -580,7 +597,7 @@ def _selftest() -> int:
         return list(model.transcribe(np.zeros(16000, dtype=np.float32))[0])
 
     failed = 0
-    for check in (teams_reader, audio_devices, voice_detection, speech_engine, find_claude_cli):
+    for check in (teams_reader, audio_devices, audio_resampling, voice_detection, speech_engine, find_claude_cli):
         try:
             log.info("selftest %s: ok %s", check.__name__, str(check())[:200])
         except Exception:
