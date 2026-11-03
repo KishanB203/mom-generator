@@ -1,5 +1,7 @@
 ﻿# MoM Generator
 
+**Download:** https://kishanb203.github.io/mom-generator/
+
 A small Windows tray tool that writes **Minutes of Meeting (MoM)** for Teams meetings (stand-ups, planning, client calls, reviews) and for in-person meetings around your laptop.
 
 **Teams meetings are recorded automatically:** recording starts when you join a meeting or call and stops when you leave it. For an **in-person meeting**, click the tray icon to start and again to stop; it records the room with the laptop's built-in microphone. Either way, a few minutes later you get **two files**: a full transcript showing who said what, and a clean English MoM. It works even when people switch between **English, Hindi and Gujarati**, which Teams' own transcript can't handle.
@@ -27,7 +29,7 @@ User_3: मैं construction master का mapping कल तक finish कर
 
 ## Install (users)
 
-1. Download **MoMGenerator-Setup.exe** from the download page and double-click it.
+1. Download **MoMGenerator-Setup.exe** from the [download page](https://kishanb203.github.io/mom-generator/) and double-click it.
    If Windows shows *Windows protected your PC*, click **More info > Run anyway** (the installer isn't code-signed yet).
 2. Click **Install**. No admin rights are needed. The app starts by itself when the install finishes.
 3. **The setup window** checks three things and helps with whatever is missing:
