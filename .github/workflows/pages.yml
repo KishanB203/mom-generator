@@ -25,7 +25,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/configure-pages@v5  # Settings > Pages > Source must be "GitHub Actions"
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true  # switch Pages on (source: GitHub Actions) if it is off
       - uses: actions/upload-pages-artifact@v3
         with:
           path: website
