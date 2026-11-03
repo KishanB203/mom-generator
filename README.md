@@ -89,8 +89,31 @@ Click **Test audio (3 s)** while some sound is playing. Both levels should be ab
 **Update:** run the newest MoMGenerator-Setup.exe over the old version. Your notes and settings stay.
 **Uninstall:** Windows Settings > Apps > *MoM Generator* > Uninstall. Your notes in `Downloads\MoM_Notes` and settings in `%APPDATA%\MoMGenerator` are kept; delete them yourself if you want.
 
-## Privacy
-Audio is converted to text **on your PC** and is never uploaded. Only the text transcript is sent to Claude. Always tell participants the meeting is being recorded, and follow your company's recording policy.
+## Privacy policy
+MoM Generator has no telemetry and no server of its own. It connects only to these services:
+
+- **Claude (Anthropic):** the text transcript is sent to write the MoM. It goes through the Claude account you sign in with, or your own API key. Audio is never uploaded; it is converted to text **on your PC**.
+- **Hugging Face:** the speech model is downloaded once, during setup.
+- **claude.ai:** Claude Code is installed from here, only when you click **Install** in the setup window.
+
+Recordings, transcripts and MoMs stay on your PC: `Downloads\MoM_Notes` and `%APPDATA%\MoMGenerator`.
+
+Always tell participants the meeting is being recorded, and follow your company's recording policy.
+
+**Changes to Windows settings**, all visible and reversible in the "How it works" window:
+- **Start with Windows:** off unless you tick it.
+- **Always show the icon on the taskbar:** on by default; untick to turn it off.
+
+## Code signing policy
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- **Committers and reviewers:** [KishanB203](https://github.com/KishanB203)
+- **Approvers:** [KishanB203](https://github.com/KishanB203)
+
+Only `MoMGenerator.exe` and `MoMGenerator-Setup.exe` are signed. Both are built by GitHub Actions from this repository ([release.yml](.github/workflows/release.yml)), and each release is approved by hand before it is signed. The bundled open-source libraries are shipped as published by their maintainers.
+
+## License
+[MIT](LICENSE)
 
 ---
 

@@ -1,5 +1,11 @@
 # Builds MoMGenerator-Setup.exe and publishes it as a GitHub release.
 # Trigger: push a tag that matches mom_app/__init__.py's __version__, e.g.  git tag v1.0.0 && git push origin v1.0.0
+#
+# Code signing (SignPath Foundation) switches on by itself once these repository settings exist
+# (Settings > Secrets and variables > Actions):
+#   variable SIGNPATH_ORGANIZATION_ID, secret SIGNPATH_API_TOKEN
+#   optional variables SIGNPATH_PROJECT_SLUG (default mom-generator), SIGNPATH_POLICY_SLUG (default release-signing)
+# Each signing request waits until it is approved on signpath.io. Without these settings the release is unsigned.
 name: Release
 
 on:
@@ -8,10 +14,17 @@ on:
 
 permissions:
   contents: write
+  actions: read
+
+env:
+  SIGN: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+  SIGNPATH_PROJECT: ${{ vars.SIGNPATH_PROJECT_SLUG || 'mom-generator' }}
+  SIGNPATH_POLICY: ${{ vars.SIGNPATH_POLICY_SLUG || 'release-signing' }}
 
 jobs:
   build:
     runs-on: windows-latest
+    timeout-minutes: 300  # signing waits for manual approval
     steps:
       - uses: actions/checkout@v4
 
@@ -20,10 +33,12 @@ jobs:
           python-version: "3.12"
 
       - name: Check the tag matches the app version
+        id: version
         shell: pwsh
         run: |
           $version = python -c "import mom_app; print(mom_app.__version__)"
           if ("v$version" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} != app version v$version (mom_app/__init__.py)" }
+          "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Install packages and tools
         shell: pwsh
@@ -32,9 +47,9 @@ jobs:
           python -m pip install -r requirements.txt pyinstaller
           choco install innosetup -y --no-progress
 
-      - name: Build the installer
+      - name: Build the app
         shell: pwsh
-        run: ./installer/build.ps1 -Python python
+        run: ./installer/build.ps1 -Python python -Stage app
 
       - name: Self-test the packaged app
         shell: pwsh
@@ -44,6 +59,74 @@ jobs:
           # no audio devices on the build server, so only the other checks must pass
           $failed = Get-Content "$env:APPDATA\MoMGenerator\app.log" | Select-String "selftest (?!audio_devices)\w+: FAILED"
           if ($failed) { throw "Self-test failed" }
+
+      # ---- sign MoMGenerator.exe ----
+      - name: Upload the app for signing
+        if: env.SIGN == 'true'
+        id: app-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-unsigned
+          path: build/dist/MoMGenerator/MoMGenerator.exe
+
+      - name: Sign the app
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ env.SIGNPATH_PROJECT }}
+          signing-policy-slug: ${{ env.SIGNPATH_POLICY }}
+          artifact-configuration-slug: app
+          github-artifact-id: ${{ steps.app-unsigned.outputs.artifact-id }}
+          wait-for-completion-timeout-in-seconds: 14400
+          output-artifact-directory: build/signed-app
+          parameters: |
+            version: "${{ steps.version.outputs.version }}"
+
+      - name: Use the signed app
+        if: env.SIGN == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item build/signed-app/MoMGenerator.exe build/dist/MoMGenerator/MoMGenerator.exe -Force
+          $sig = Get-AuthenticodeSignature build/dist/MoMGenerator/MoMGenerator.exe
+          if ($sig.Status -ne "Valid") { throw "MoMGenerator.exe signature: $($sig.Status)" }
+
+      # ---- installer ----
+      - name: Build the installer
+        shell: pwsh
+        run: ./installer/build.ps1 -Python python -Stage installer
+
+      - name: Upload the installer for signing
+        if: env.SIGN == 'true'
+        id: setup-unsigned
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-unsigned
+          path: dist/MoMGenerator-Setup.exe
+
+      - name: Sign the installer
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ env.SIGNPATH_PROJECT }}
+          signing-policy-slug: ${{ env.SIGNPATH_POLICY }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.setup-unsigned.outputs.artifact-id }}
+          wait-for-completion-timeout-in-seconds: 14400
+          output-artifact-directory: dist/signed
+          parameters: |
+            version: "${{ steps.version.outputs.version }}"
+
+      - name: Use the signed installer
+        if: env.SIGN == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item dist/signed/MoMGenerator-Setup.exe dist/MoMGenerator-Setup.exe -Force
+          $sig = Get-AuthenticodeSignature dist/MoMGenerator-Setup.exe
+          if ($sig.Status -ne "Valid") { throw "MoMGenerator-Setup.exe signature: $($sig.Status)" }
 
       - uses: softprops/action-gh-release@v2
         with:

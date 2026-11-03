@@ -3,6 +3,7 @@
 import logging
 import os
 import subprocess
+import sys
 import threading
 import tkinter as tk
 from pathlib import Path
@@ -224,7 +225,7 @@ class SetupWindow:
 class GuideWindow:
     """How to use the app. Shown after setup and from the tray menu (How it works)."""
 
-    def __init__(self, root: tk.Tk, settings: Settings, actions: dict):
+    def __init__(self, root: tk.Tk, settings: Settings, actions: dict, first: bool = False):
         self.settings = settings
         self.win = tk.Toplevel(root)
         self.win.title(f"{APP_NAME} - How it works")
@@ -267,6 +268,12 @@ class GuideWindow:
         ttk.Checkbutton(f, text="Start MoM Generator when Windows starts (needed to catch Teams meetings automatically)",
                         variable=self.autostart, command=lambda: start_with_windows(self.autostart.get())
                         ).grid(row=r, column=0, columnspan=2, sticky="w", pady=(14, 0))
+        if getattr(sys, "frozen", False):  # installed app: its own exe identifies the tray icon
+            exe = Path(sys.executable).name
+            self.tray = tk.BooleanVar(value=promote_tray_icon(exe, True if first else None))
+            ttk.Checkbutton(f, text="Always show the MoM Generator icon on the taskbar (not hidden under ^)",
+                            variable=self.tray, command=lambda: promote_tray_icon(exe, self.tray.get())
+                            ).grid(row=r + 1, column=0, columnspan=2, sticky="w")
 
         bar = ttk.Frame(self.win, padding=(20, 0, 20, 16))
         bar.pack(fill="x")
@@ -276,11 +283,12 @@ class GuideWindow:
         _bring_to_front(self.win)
 
 
-def promote_tray_icon(exe_name: str) -> None:
-    """Windows 11 hides new tray icons under the ^ arrow. Show this app's icon on the taskbar instead
-    (the same switch as Settings > Personalization > Taskbar > Other system tray icons)."""
+def promote_tray_icon(exe_name: str, enable: bool | None = None) -> bool:
+    """Windows 11 hides new tray icons under the ^ arrow. Read (enable=None) or change whether this app's icon
+    is always shown on the taskbar: the same switch as Settings > Personalization > Taskbar > Other system tray icons."""
     import winreg
 
+    shown = False
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Control Panel\NotifyIconSettings") as root:
             for i in range(winreg.QueryInfoKey(root)[0]):
@@ -290,7 +298,14 @@ def promote_tray_icon(exe_name: str) -> None:
                         path = winreg.QueryValueEx(key, "ExecutablePath")[0]
                     except OSError:
                         continue
-                    if os.path.basename(path).lower() == exe_name.lower():
-                        winreg.SetValueEx(key, "IsPromoted", 0, winreg.REG_DWORD, 1)
+                    if os.path.basename(path).lower() != exe_name.lower():
+                        continue
+                    if enable is not None:
+                        winreg.SetValueEx(key, "IsPromoted", 0, winreg.REG_DWORD, int(enable))
+                    try:
+                        shown = bool(winreg.QueryValueEx(key, "IsPromoted")[0])
+                    except OSError:
+                        shown = False
     except OSError:
-        log.debug("Could not promote the tray icon", exc_info=True)
+        log.debug("Could not change the tray icon setting", exc_info=True)
+    return shown

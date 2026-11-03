@@ -28,7 +28,7 @@ from .recorder import AudioDeviceError, Recorder, room_microphone
 from .screen import MeetingDetector, MeetingWatcher, looks_like_name, screen_summary, speaker_at
 from .teams import detect_meeting_name, meeting_name_from_title, safe_filename
 from .transcripts import read_transcript_file
-from .setup_window import GuideWindow, SetupWindow, promote_tray_icon
+from .setup_window import GuideWindow, SetupWindow
 from .ui import PasteDialog, SettingsDialog
 
 log = logging.getLogger(__name__)
@@ -474,10 +474,10 @@ class TrayApp:
     def _setup_finished(self, first: bool) -> None:
         self._setup_window = None
         if first:
-            self.show_guide()
+            self.show_guide(first=True)
 
-    def show_guide(self) -> None:
-        GuideWindow(self.root, self.settings, {"open_folder": self.open_folder, "settings": self.open_settings})
+    def show_guide(self, first: bool = False) -> None:
+        GuideWindow(self.root, self.settings, {"open_folder": self.open_folder, "settings": self.open_settings}, first)
 
     def _check_sign_in(self) -> None:
         if self.settings.claude_backend == "api" or (self.settings.claude_backend == "auto" and get_api_key()):
@@ -537,8 +537,6 @@ class TrayApp:
             ready + f"click the tray icon or press {self.settings.hotkey} to record an in-person meeting."))
         if not self.settings.setup_done:
             self.root.after(500, self.show_setup)
-            if getattr(sys, "frozen", False):  # installed app: show the icon on the taskbar, not under ^
-                self._later(4, lambda: promote_tray_icon(Path(sys.executable).name))
         else:
             self._later(3, self._check_sign_in)
         self.root.mainloop()
